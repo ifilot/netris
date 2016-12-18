@@ -1,5 +1,5 @@
 /**************************************************************************
- *   camera.cpp  --  This file is part of Netris.                         *
+ *   frame.h  --  This file is part of Netris.                            *
  *                                                                        *
  *   Copyright (C) 2016, Ivo Filot                                        *
  *                                                                        *
@@ -18,57 +18,31 @@
  *                                                                        *
  **************************************************************************/
 
-/**
- * @file camera.cpp
- * @brief Source file for camera class
- *
- * @author Ivo Filot
- *
- * @date 2016-06-12
- */
+#ifndef _FRAME_H
+#define _FRAME_H
 
-#include "camera.h"
+#include "gfx/sprite_manager.h"
+#include "game/block.h"
 
-/**
- * @brief       update the camera perspective matrix
- *
- * @return      void
- */
-void Camera::update() {
-    this->projection = glm::ortho(0.0f, 22.0f * this->aspect_ratio, 0.0f, 22.0f, -300.0f, 300.0f);
-    this->view = glm::lookAt(
-                    glm::vec3(this->position, 1.0),              // cam pos
-                    glm::vec3(this->position, 0.0),              // look at
-                    glm::vec3(0,1,0)               // up
-                );
-}
+class Frame {
+private:
+    std::vector<Block> tiles;
 
-/**
- * @brief       translate the camera in the clock-wise direction
- *
- * @return      void
- */
-void Camera::translate(const glm::vec3& trans) {
-    this->update();
-}
+public:
 
-/**
- * @brief      set camera position and up direction
- *
- * @param      camera position
- * @param      up direction
- * @return     void
- */
-void Camera::set_camera_position(const glm::vec3& _position, const glm::vec3& _up) {
-    this->update();
-}
+    static Frame& get() {
+        static Frame frame_instance;
+        return frame_instance;
+    }
 
-/**
- * @brief       camera constructor
- *
- * @return      camera instance
- */
-Camera::Camera() {
-    this->position = glm::vec2(0.0f, 0.0f);
-    this->update();
-}
+    void draw();
+
+private:
+    Frame();
+
+    // Singleton pattern
+    Frame(Frame const&)          = delete;
+    void operator=(Frame const&)  = delete;
+};
+
+#endif //_FRAME_H

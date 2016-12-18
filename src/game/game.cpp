@@ -1,18 +1,20 @@
 /**************************************************************************
+ *   game.cpp  --  This file is part of Netris.                           *
  *                                                                        *
- *   This program is free software; you can redistribute it and/or modify *
- *   it under the terms of the GNU General Public License as published by *
- *   the Free Software Foundation, version 3                              *
+ *   Copyright (C) 2016, Ivo Filot                                        *
  *                                                                        *
- *   This program is distributed in the hope that it will be useful, but  *
- *   WITHOUT ANY WARRANTY; without even the implied warranty of           *
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU    *
- *   General Public License for more details.                             *
+ *   Netris is free software: you can redistribute it and/or modify       *
+ *   it under the terms of the GNU General Public License as published    *
+ *   by the Free Software Foundation, either version 3 of the License,    *
+ *   or (at your option) any later version.                               *
+ *                                                                        *
+ *   Netris is distributed in the hope that it will be useful,            *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty          *
+ *   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.              *
+ *   See the GNU General Public License for more details.                 *
  *                                                                        *
  *   You should have received a copy of the GNU General Public License    *
- *   along with this program; if not, write to the Free Software          *
- *   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA            *
- *   02110-1301, USA.                                                     *
+ *   along with this program.  If not, see http://www.gnu.org/licenses/.  *
  *                                                                        *
  **************************************************************************/
 
@@ -22,16 +24,12 @@ Game::Game() {
     this->piece = new Piece(0);
     this->blocks.resize(240);
 
-    for(unsigned int i=0; i<10; i++) {
-        this->blocks[i] = std::unique_ptr<Block>(new Block(glm::vec2(i,0), SpriteManager::get().get_sprite_pointer(0)));
-    }
-
-    this->update_slots();
+    //this->update_slots();
 }
 
 void Game::draw() {
     glActiveTexture(GL_TEXTURE1);
-    SpriteManager::get().bind_sprites();
+    SpriteManager::get().bind_sprites(0);
 
     for(auto block = this->blocks.begin(); block != this->blocks.end(); block++) {
         if(block->get()) {
@@ -159,7 +157,7 @@ void Game::check_lines() {
         }
     }
 
-    for(unsigned int i=lines_to_remove.size() * 10; i<this->blocks.size(); i++) {
+    for(unsigned int i=(lines_to_remove.back()+1) * 10; i<this->blocks.size(); i++) {
         if(this->blocks[i].get()) {
             this->blocks[i].get()->translate(0, -(float)lines_to_remove.size());
             std::swap(blocks[i], blocks[i - lines_to_remove.size() * 10]);

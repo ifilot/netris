@@ -1,5 +1,5 @@
 /**************************************************************************
- *   camera.cpp  --  This file is part of Netris.                         *
+ *   frame.cpp  --  This file is part of Netris.                          *
  *                                                                        *
  *   Copyright (C) 2016, Ivo Filot                                        *
  *                                                                        *
@@ -18,57 +18,38 @@
  *                                                                        *
  **************************************************************************/
 
-/**
- * @file camera.cpp
- * @brief Source file for camera class
- *
- * @author Ivo Filot
- *
- * @date 2016-06-12
- */
+#include "frame.h"
 
-#include "camera.h"
+Frame::Frame() {
+    this->tiles.push_back(Block(glm::vec2(-1.f,-1.f), SpriteManager::get().get_sprite_pointer(7)));
+    this->tiles.push_back(Block(glm::vec2(10.f,-1.f), SpriteManager::get().get_sprite_pointer(9)));
 
-/**
- * @brief       update the camera perspective matrix
- *
- * @return      void
- */
-void Camera::update() {
-    this->projection = glm::ortho(0.0f, 22.0f * this->aspect_ratio, 0.0f, 22.0f, -300.0f, 300.0f);
-    this->view = glm::lookAt(
-                    glm::vec3(this->position, 1.0),              // cam pos
-                    glm::vec3(this->position, 0.0),              // look at
-                    glm::vec3(0,1,0)               // up
-                );
+    for(unsigned int i=1; i<11; i++) {
+        this->tiles.push_back(Block(glm::vec2((float)(i - 1),-1.f), SpriteManager::get().get_sprite_pointer(8)));
+    }
+
+    for(unsigned int i=0; i<23; i++) {
+        this->tiles.push_back(Block(glm::vec2(-1.f, (float)i), SpriteManager::get().get_sprite_pointer(10)));
+    }
+
+    for(unsigned int i=0; i<23; i++) {
+        this->tiles.push_back(Block(glm::vec2(10.f, (float)i), SpriteManager::get().get_sprite_pointer(12)));
+    }
+
+    for(unsigned int i=11; i<40; i++) {
+        for(unsigned int j=0; j<23; j++) {
+            this->tiles.push_back(Block(glm::vec2((float)i, (float)j - 1.0f), SpriteManager::get().get_sprite_pointer(11)));
+        }
+    }
 }
 
-/**
- * @brief       translate the camera in the clock-wise direction
- *
- * @return      void
- */
-void Camera::translate(const glm::vec3& trans) {
-    this->update();
-}
+void Frame::draw() {
+    glActiveTexture(GL_TEXTURE1);
+    SpriteManager::get().bind_sprites(1);
 
-/**
- * @brief      set camera position and up direction
- *
- * @param      camera position
- * @param      up direction
- * @return     void
- */
-void Camera::set_camera_position(const glm::vec3& _position, const glm::vec3& _up) {
-    this->update();
-}
+    for(auto tile = this->tiles.begin(); tile != this->tiles.end(); tile++) {
+        tile->draw();
+    }
 
-/**
- * @brief       camera constructor
- *
- * @return      camera instance
- */
-Camera::Camera() {
-    this->position = glm::vec2(0.0f, 0.0f);
-    this->update();
+    SpriteManager::get().unbind_sprites();
 }

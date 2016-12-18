@@ -1,5 +1,5 @@
 /**************************************************************************
- *   entris.h  --  This file is part of Netris.                           *
+ *   netris.h  --  This file is part of Netris.                           *
  *                                                                        *
  *   Copyright (C) 2016, Ivo Filot                                        *
  *                                                                        *
