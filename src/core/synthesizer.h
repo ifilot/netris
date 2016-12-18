@@ -1,5 +1,5 @@
 /**************************************************************************
- *   game.h  --  This file is part of Netris.                             *
+ *   synthesizer.h  --  This file is part of Netris.                      *
  *                                                                        *
  *   Copyright (C) 2016, Ivo Filot                                        *
  *                                                                        *
@@ -18,54 +18,53 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _GAME_H
-#define _GAME_H
+#ifndef _SYNTHESIZER_H
+#define _SYNTHESIZER_H
 
-#include <bitset>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int_distribution.hpp>
+#include "core/asset_manager.h"
 
-#include "gfx/sprite_manager.h"
-#include "game/block.h"
-#include "game/piece.h"
-#include "core/synthesizer.h"
+#include <iostream>
+#include <AL/al.h>
+#include <AL/alc.h>
+#include <AL/alut.h>
+#include <cstring>
+#include <string>
+#include <vector>
 
-class Game {
+class Synthesizer {
 private:
-    std::vector<std::unique_ptr<Block>> blocks;
-    Piece* piece;
-    std::bitset<240> slots;
-    std::vector<std::vector<Block>::iterator> block_indices;
-    boost::random::mt19937 rng;
+    ALCdevice* device;
+    std::vector<ALuint> buffers;
+    std::vector<ALuint> sources;
 
 public:
-    static Game& get() {
-        static Game game_instance;
-        return game_instance;
+    static Synthesizer& get() {
+        static Synthesizer synthesizer_instance;
+        return synthesizer_instance;
     }
 
-    void draw();
+    static void kill_synthesizer();
 
-    void update();
+    inline void play(unsigned int sound_id) {
+        alSourcePlay(this->sources[sound_id]);
+    }
 
-    void handle_key_down(int key, int scancode, int action, int mods);
+    ~Synthesizer();
 
 private:
-    Game();
+    Synthesizer();
 
-    void update_slots();
+    void load_sound_data(const std::string& filename);
 
-    void launch_new_piece();
+    void set_listener();
 
-    void translate_piece(const glm::vec2& dir);
+    void delete_buffers_and_sources();
 
-    void rotate_piece(float angle);
-
-    void check_lines();
+    void load_mp3(const std::string filename);
 
     // Singleton pattern
-    Game(Game const&)          = delete;
-    void operator=(Game const&)  = delete;
+    Synthesizer(Synthesizer const&) = delete;
+    void operator=(Synthesizer const&)  = delete;
 };
 
-#endif //_GAME_H
+#endif //_SYNTHESIZER_H

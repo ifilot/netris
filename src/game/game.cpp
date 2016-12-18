@@ -25,6 +25,9 @@ Game::Game() {
     this->blocks.resize(240);
 
     //this->update_slots();
+
+    // load synthesizer for sound effects
+    Synthesizer::get().play(0);
 }
 
 void Game::draw() {
@@ -52,6 +55,8 @@ void Game::update() {
             exit(0);
             return;
         }
+        // play collision sound
+        Synthesizer::get().play(1);
         this->launch_new_piece();
         return;
     }
@@ -117,8 +122,13 @@ void Game::handle_key_down(int key, int scancode, int action, int mods) {
 
 void Game::translate_piece(const glm::vec2& dir) {
     if(this->piece->check_colission_translate(this->slots, dir)) {
+        // if direction is down, trigger update
+        if(dir == glm::vec2(0,-1)) {
+            this->update();
+        }
         return;
     }
+
     // if no collision update piece
     this->piece->translate(dir);
 }

@@ -53,6 +53,7 @@ set (Boost_USE_STATIC_RUNTIME OFF)
 set (BOOST_ALL_DYN_LINK OFF)
 
 # Include libraries
+find_package(OpenAL REQUIRED)
 find_package(glfw3 3.1 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(PkgConfig REQUIRED)
@@ -61,13 +62,16 @@ pkg_check_modules(EIGEN eigen3 REQUIRED)
 pkg_check_modules(GLEW REQUIRED glew)
 pkg_check_modules(PNG REQUIRED libpng)
 pkg_check_modules(FREETYPE REQUIRED freetype2)
+pkg_check_modules(ALUT REQUIRED freealut)
 
 # Set include folders
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_BINARY_DIR}
                     ${Boost_INCLUDE_DIRS}
                     ${EIGEN_INCLUDE_DIRS}
-                    ${FREETYPE_INCLUDE_DIRS})
+                    ${FREETYPE_INCLUDE_DIRS}
+                    ${OPENAL_INCLUDE_DIR}
+                    ${ALUT_INCLUDE_DIR})
 
 # Add sources
 file(GLOB_RECURSE SOURCES "*.cpp")
@@ -96,7 +100,7 @@ if(APPLE)
     SET_TARGET_PROPERTIES(lib_glew PROPERTIES IMPORTED_LOCATION ${GLEW_STATIC_LIBRARY_DIRS}/lib${GLEW_STATIC_LIBRARIES}.a)
     target_link_libraries(netris glfw ${GLFW3_LIBRARY} ${X11_Xinerama_LIB} ${X11_Xrandr_LIB} ${X11_Xcursor_LIB} ${OPENGL_glu_LIBRARY} ${Boost_LIBRARIES} lib_png lib_freetype lib_z lib_bz2 lib_glew pthread dl)
 else()
-    target_link_libraries(netris glfw ${GLFW3_LIBRARY} ${X11_Xinerama_LIB} ${X11_Xrandr_LIB} ${X11_Xcursor_LIB} ${OPENGL_glu_LIBRARY} ${GLEW_STATIC_LIBRARIES} ${Boost_LIBRARIES} ${PNG_LIBRARIES} ${FREETYPE_LIBRARIES} pthread dl)
+    target_link_libraries(netris glfw ${ALUT_LIBRARIES} ${GLFW3_LIBRARY} ${X11_Xinerama_LIB} ${X11_Xrandr_LIB} ${X11_Xcursor_LIB} ${OPENGL_glu_LIBRARY} ${GLEW_STATIC_LIBRARIES} ${Boost_LIBRARIES} ${PNG_LIBRARIES} ${FREETYPE_LIBRARIES} ${OPENAL_LIBRARY} pthread dl)
 endif()
 
 # add Boost definition
