@@ -106,8 +106,32 @@ void Synthesizer::load_ogg_file(const std::string filename) {
 
     this->buffers.push_back(0);
     alGenBuffers(1, &this->buffers.back());
-    if(alGetError() != AL_NO_ERROR) {
-        std::cerr << "An error was detecting loading the sound file" << std::endl;
+    ALenum error;
+    if((error = alGetError()) != AL_NO_ERROR) {
+        std::cerr << "An error was detecting generating the sound buffer" << std::endl;
+        switch(error) {
+            case AL_NO_ERROR:
+              std::cerr << "AL_NO_ERROR" << std::endl;
+            break;
+            case AL_INVALID_NAME:
+              std::cerr << "AL_INVALID_NAME" << std::endl;
+            break;
+            case AL_INVALID_ENUM:
+              std::cerr << "AL_INVALID_ENUM" << std::endl;
+            break;
+            case AL_INVALID_VALUE:
+              std::cerr << "AL_INVALID_VALUE" << std::endl;
+            break;
+            case AL_INVALID_OPERATION:
+              std::cerr << "AL_INVALID_OPERATION" << std::endl;
+            break;
+            case AL_OUT_OF_MEMORY:
+              std::cerr << "AL_OUT_OF_MEMORY" << std::endl;
+            break;
+            default:
+              std::cerr << "No such error code" << std::endl;
+            break;
+        }
         return;
     }
 
@@ -129,7 +153,7 @@ void Synthesizer::load_ogg_file(const std::string filename) {
     ov_clear(&vf); // we no longer need the data
 
     if(alGetError() != AL_NO_ERROR) {
-        std::cerr << "An error was detecting loading the sound file" << std::endl;
+        std::cerr << "An error was detecting loading the sound buffer data" << std::endl;
         return;
     } else {
         this->bind_source_to_last_buffer();
