@@ -226,7 +226,6 @@ void PostProcessor::swap_active_buffer() {
  * @brief      perform a texture render (used for the filters)
  */
 void PostProcessor::render(const std::unique_ptr<Shader>& shader) {
-    glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glActiveTexture(GL_TEXTURE2);

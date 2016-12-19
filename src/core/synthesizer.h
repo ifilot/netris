@@ -24,9 +24,13 @@
 #include "core/asset_manager.h"
 
 #include <iostream>
-#include <AL/al.h>
-#include <AL/alc.h>
-#include <AL/alut.h>
+#ifdef APPLE
+    #include <OpenAL/alut.h>
+#else
+    #include <AL/al.h>
+    #include <AL/alc.h>
+    #include <AL/alut.h>
+#endif
 #include <cstring>
 #include <string>
 #include <vector>

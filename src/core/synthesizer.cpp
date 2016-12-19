@@ -22,6 +22,11 @@
 
 Synthesizer::Synthesizer() {
     alutInit(NULL, 0);
+    ALenum error = 0;
+    if((error = alutGetError()) != ALUT_ERROR_NO_ERROR) {
+        std::cerr << alutGetErrorString(error) << std::endl;
+        exit(-1);
+    }
     alGetError();
 
     this->load_ogg_file("music/theme.ogg");

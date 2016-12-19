@@ -29,7 +29,12 @@ SpriteManager::SpriteManager() {
     this->shader->add_uniform(ShaderUniform::TEXTURE, "tex", 1);
     this->shader->set_texture_id(1); // corresponds to GL_TEXTURE1
 
+    // load vao before binding
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
     this->shader->bind_uniforms_and_attributes();
+    glDeleteVertexArrays(1, &vao);
 
     // load texture
     this->load_texture("assets/png/blocks.png", 0);

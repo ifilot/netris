@@ -209,7 +209,7 @@ void Visualizer::update_second() {
  *
  */
 void Visualizer::pre_draw() {
-    Screen::get().set_focus(glfwGetWindowAttrib(Display::get().get_window_ptr(), GLFW_FOCUSED));
+    //Screen::get().set_focus(glfwGetWindowAttrib(Display::get().get_window_ptr(), GLFW_FOCUSED));
     Display::get().open_frame();   /* start new frame */
 
     // first create a texture map
@@ -217,10 +217,9 @@ void Visualizer::pre_draw() {
 
     // then perform the normal rendering in the PostProcessor texture
     PostProcessor::get().bind_frame_buffer();
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glEnable(GL_DEPTH_TEST);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glViewport(0, 0, Screen::get().get_resolution_x(), Screen::get().get_resolution_y());
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     Camera::get().update();
 }
 

@@ -98,6 +98,9 @@ Display::Display() {
         std::cerr << "Could not initialize GLEW" << std::endl;
     }
 
+    // set background color
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+
     // enable transparency
     glEnable (GL_BLEND);
     glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -107,7 +110,7 @@ Display::Display() {
     glEnable(GL_DEPTH_TEST);
 
     // disable cursor (we are going to use our own)
-    //glfwSetInputMode(this->m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    glfwSetInputMode(this->m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
     // configure camera dimensions
     Camera::get().set_aspect_ratio(Screen::get().get_aspect_ratio_resolution());
