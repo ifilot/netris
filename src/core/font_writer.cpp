@@ -142,9 +142,9 @@ void FontWriter::CharacterAtlas::write_text(float x, float y, float z, const glm
     }
 
     const glm::mat4 projection = glm::ortho(0.0f,
-                                      (float)Screen::get().get_width(),
+                                      (float)Screen::get().get_resolution_x(),
                                       0.0f,
-                                      (float)Screen::get().get_height());
+                                      (float)Screen::get().get_resolution_y());
 
     float xx = x;
     float yy = y;
@@ -639,9 +639,9 @@ std::vector<bool> FontWriter::CharacterAtlas::unpack_mono_bitmap(FT_Bitmap bitma
  */
 void FontWriter::CharacterAtlas::draw_charmap_on_screen() {
     const glm::mat4 projection = glm::ortho(0.0f,
-                                      (float)Screen::get().get_width(),
+                                      (float)Screen::get().get_resolution_x(),
                                       0.0f,
-                                      (float)Screen::get().get_height());
+                                      (float)Screen::get().get_resolution_y());
 
     // load the texture
     glActiveTexture(GL_TEXTURE1);

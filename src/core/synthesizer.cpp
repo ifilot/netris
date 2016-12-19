@@ -26,6 +26,7 @@ Synthesizer::Synthesizer() {
 
     this->load_ogg_file("music/theme.ogg");
     this->load_ogg_file("effects/block_hit.ogg");
+    this->load_ogg_file("effects/block_destroy.ogg");
 
     this->set_listener();
 

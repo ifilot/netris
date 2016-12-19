@@ -35,6 +35,10 @@ class Screen {
 private:
     unsigned int width;       //!< width of the screen
     unsigned int height;      //!< height of the screen
+
+    unsigned int resolution_x;
+    unsigned int resolution_y;
+
     bool flag_focus;          //!< whether screen is in focus
 
 public:
@@ -58,6 +62,14 @@ public:
         return this->height;
     }
 
+    inline unsigned int get_resolution_x() const {
+        return this->resolution_x;
+    }
+
+    inline unsigned int get_resolution_y() const {
+        return this->resolution_y;
+    }
+
     inline void set_width(unsigned int _width) {
         this->width = _width;
     }
@@ -66,8 +78,20 @@ public:
         this->height = _height;
     }
 
-    inline float get_aspect_ratio() const {
+    inline void set_resolution_x(unsigned int _resolution_x) {
+        this->resolution_x = _resolution_x;
+    }
+
+    inline void set_resolution_y(unsigned int _resolution_y) {
+        this->resolution_y = _resolution_y;
+    }
+
+    inline float get_aspect_ratio_screen() const {
         return (float)this->width / (float)this->height;
+    }
+
+    inline float get_aspect_ratio_resolution() const {
+        return (float)this->resolution_x / (float)this->resolution_y;
     }
 
     inline bool in_focus() const {

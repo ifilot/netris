@@ -34,7 +34,7 @@ private:
 public:
     Piece(unsigned int _type);
 
-    void draw();
+    void draw(const glm::mat4& mvp);
 
     void add_block(float x, float y, unsigned int bt);
 

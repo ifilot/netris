@@ -25,8 +25,8 @@ Block::Block(const glm::vec2& _pos, const Sprite* _sprite) {
     this->sprite = _sprite;
 }
 
-void Block::draw() {
-    glm::mat4 mvp = glm::translate(Camera::get().get_projection() * Camera::get().get_view(), glm::vec3(this->pos + glm::vec2(1,1),0.0f));
+void Block::draw(const glm::mat4& _mvp) {
+    const glm::mat4 mvp = glm::translate(_mvp, glm::vec3(this->pos, 0.0f));
     SpriteManager::get().get_shader()->set_uniform(0, &mvp[0][0]);
     this->sprite->draw();
 }

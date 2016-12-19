@@ -69,9 +69,9 @@ Piece::Piece(unsigned int _type) {
     type = _type;
 }
 
-void Piece::draw() {
+void Piece::draw(const glm::mat4& mvp) {
     for(auto block = this->blocks.begin(); block != this->blocks.end(); block++) {
-        block->draw();
+        block->draw(mvp);
     }
 }
 

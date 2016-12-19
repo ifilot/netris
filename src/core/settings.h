@@ -1,5 +1,5 @@
 /**************************************************************************
- *   synthesizer.h  --  This file is part of Netris.                      *
+ *   settings.h  --  This file is part of Netris.                         *
  *                                                                        *
  *   Copyright (C) 2016, Ivo Filot                                        *
  *                                                                        *
@@ -18,61 +18,46 @@
  *                                                                        *
  **************************************************************************/
 
-#ifndef _SYNTHESIZER_H
-#define _SYNTHESIZER_H
+#ifndef _SETTINGS_H
+#define _SETTINGS_H
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
+#include <glm/glm.hpp>
 
 #include "core/asset_manager.h"
 
-#include <iostream>
-#include <AL/al.h>
-#include <AL/alc.h>
-#include <AL/alut.h>
-#include <cstring>
-#include <string>
-#include <vector>
-#include <vorbis/codec.h>
-#include <vorbis/vorbisfile.h>
-
-class Synthesizer {
+class Settings {
 private:
-    ALCdevice* device;
-    std::vector<ALuint> buffers;
-    std::vector<ALuint> sources;
+    std::string settings_file;
+    boost::property_tree::ptree root;
 
 public:
-    static Synthesizer& get() {
-        static Synthesizer synthesizer_instance;
-        return synthesizer_instance;
+    static Settings& get() {
+        static Settings settings_instance;
+        return settings_instance;
     }
 
-    static void kill_synthesizer();
-
-    inline void play(unsigned int sound_id) {
-        alSourcePlay(this->sources[sound_id]);
-    }
-
-    inline void set_gain(unsigned int sound_id, float gain) {
-        alSourcef (this->sources[sound_id], AL_GAIN, gain);
-    }
-
-    ~Synthesizer();
+    glm::vec3 get_color_from_keyword(const std::string& keyword);
+    std::string get_string_from_keyword(const std::string& keyword);
+    float get_float_from_keyword(const std::string& keyword);
+    unsigned int get_uint_from_keyword(const std::string& keyword);
+    bool get_boolean_from_keyword(const std::string& keyword);
 
 private:
-    Synthesizer();
+    Settings();
 
-    void load_wav_file(const std::string& filename);
+    void load();
 
-    void set_listener();
+    glm::vec3 rgb2vec3(const std::string& rgb);
 
-    void delete_buffers_and_sources();
-
-    void load_ogg_file(const std::string filename);
-
-    void bind_source_to_last_buffer();
-
-    // Singleton pattern
-    Synthesizer(Synthesizer const&) = delete;
-    void operator=(Synthesizer const&)  = delete;
+    Settings(Settings const&)          = delete;
+    void operator=(Settings const&)  = delete;
 };
 
-#endif //_SYNTHESIZER_H
+#endif //_SETTINGS_H

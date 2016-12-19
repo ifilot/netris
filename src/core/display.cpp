@@ -48,13 +48,18 @@ Display::Display() {
     int major, minor, rev;
     glfwGetVersion(&major, &minor, &rev);
 
-    // create a windowed mode window and its OpenGL context
-    const unsigned int width = Screen::get().get_width();
-    const unsigned int height = Screen::get().get_height();
+    //
+    if(Settings::get().get_boolean_from_keyword("settings.screen.full_screen")) {
+        const unsigned int width = Settings::get().get_uint_from_keyword("settings.screen.resolution_x");
+        const unsigned int height = Settings::get().get_uint_from_keyword("settings.screen.resolution_y");
+        this->m_window = glfwCreateWindow(width, height, "Netris" , NULL, NULL);
+    } else {
+        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+        this->m_window = glfwCreateWindow(mode->width, mode->height, "Netris" , monitor, NULL);
+    }
 
-    this->m_window = glfwCreateWindow(width, height, "Netris" , NULL, NULL);
-
-    glViewport(0, 0, width, height);
+    glViewport(0, 0, Screen::get().get_resolution_x(), Screen::get().get_resolution_y());
 
     // check if the window is properly constructed
     if (!this->m_window) {
@@ -105,7 +110,7 @@ Display::Display() {
     //glfwSetInputMode(this->m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
     // configure camera dimensions
-    Camera::get().set_aspect_ratio(PostProcessor::get().get_aspect_ratio());
+    Camera::get().set_aspect_ratio(Screen::get().get_aspect_ratio_resolution());
     Camera::get().update();
 }
 
@@ -268,14 +273,12 @@ void Display::char_callback(GLFWwindow* window, unsigned int key) {
  * @brief perform window resizing
  */
 void Display::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-	glViewport(0, 0, width, height);
-
     // update screen settings
     Screen::get().set_width(width);
     Screen::get().set_height(height);
 
     // update camera settings
-    Camera::get().set_aspect_ratio(PostProcessor::get().get_aspect_ratio());
+    Camera::get().set_aspect_ratio(Screen::get().get_aspect_ratio_resolution());
     Camera::get().update();
 
     // update post processor

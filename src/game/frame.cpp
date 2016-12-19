@@ -24,21 +24,38 @@ Frame::Frame() {
     this->tiles.push_back(Block(glm::vec2(-1.f,-1.f), SpriteManager::get().get_sprite_pointer(7)));
     this->tiles.push_back(Block(glm::vec2(10.f,-1.f), SpriteManager::get().get_sprite_pointer(9)));
 
-    for(unsigned int i=1; i<11; i++) {
-        this->tiles.push_back(Block(glm::vec2((float)(i - 1),-1.f), SpriteManager::get().get_sprite_pointer(8)));
+    const unsigned int bw = Screen::get().get_aspect_ratio_resolution() * 22;
+    const unsigned int lb = (bw - 10) / 2 + 1;
+
+    for(unsigned int i=0; i<lb; i++) {
+        this->tiles.push_back(Block(glm::vec2((float)i, 0.0f), SpriteManager::get().get_sprite_pointer(11)));
     }
 
-    for(unsigned int i=0; i<23; i++) {
-        this->tiles.push_back(Block(glm::vec2(-1.f, (float)i), SpriteManager::get().get_sprite_pointer(10)));
+    for(unsigned int i=lb; i<lb+10; i++) {
+        this->tiles.push_back(Block(glm::vec2((float)i, 0.0f), SpriteManager::get().get_sprite_pointer(8)));
     }
 
-    for(unsigned int i=0; i<23; i++) {
-        this->tiles.push_back(Block(glm::vec2(10.f, (float)i), SpriteManager::get().get_sprite_pointer(12)));
+    for(unsigned int i=lb+10; i<bw ; i++) {
+        this->tiles.push_back(Block(glm::vec2((float)i, 0.0f), SpriteManager::get().get_sprite_pointer(11)));
     }
 
-    for(unsigned int i=11; i<40; i++) {
-        for(unsigned int j=0; j<23; j++) {
-            this->tiles.push_back(Block(glm::vec2((float)i, (float)j - 1.0f), SpriteManager::get().get_sprite_pointer(11)));
+    for(unsigned int i=0; i<lb; i++) {
+        for(unsigned int j=1; j<22; j++) {
+            if(i == lb-1) {
+                this->tiles.push_back(Block(glm::vec2((float)i, (float)j), SpriteManager::get().get_sprite_pointer(10)));
+            } else {
+                this->tiles.push_back(Block(glm::vec2((float)i, (float)j), SpriteManager::get().get_sprite_pointer(11)));
+            }
+        }
+    }
+
+    for(unsigned int i=lb+10; i<bw ; i++) {
+        for(unsigned int j=1; j<22; j++) {
+            if(i == lb+10) {
+                this->tiles.push_back(Block(glm::vec2((float)i, (float)j), SpriteManager::get().get_sprite_pointer(12)));
+            } else {
+                this->tiles.push_back(Block(glm::vec2((float)i, (float)j), SpriteManager::get().get_sprite_pointer(11)));
+            }
         }
     }
 }
@@ -47,8 +64,10 @@ void Frame::draw() {
     glActiveTexture(GL_TEXTURE1);
     SpriteManager::get().bind_sprites(1);
 
+    const glm::mat4 mvp = Camera::get().get_projection() * Camera::get().get_view();
+
     for(auto tile = this->tiles.begin(); tile != this->tiles.end(); tile++) {
-        tile->draw();
+        tile->draw(mvp);
     }
 
     SpriteManager::get().unbind_sprites();

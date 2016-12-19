@@ -20,10 +20,23 @@
 
 #include "core/asset_manager.h"
 #include "core/display.h"
+#include "core/screen.h"
+#include "core/settings.h"
 
 int main(int argc, char* argv[]) {
 
+    // AssetManager needs to be loaded
     AssetManager::get().init(argv[0]);
+
+    // load screen settings
+    const unsigned int width = Settings::get().get_float_from_keyword("settings.screen.resolution_x");
+    const unsigned int height = Settings::get().get_float_from_keyword("settings.screen.resolution_y");
+    Screen::get().set_resolution_x(width);
+    Screen::get().set_resolution_y(height);
+
+    Screen::get().set_width(width);
+    Screen::get().set_height(height);
+
     Visualizer::get().run(argc, argv);
 
     return 0;

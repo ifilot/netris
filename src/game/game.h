@@ -30,6 +30,7 @@
 #include "game/piece.h"
 #include "core/synthesizer.h"
 #include "core/font_writer.h"
+#include "core/settings.h"
 
 class Game {
 private:

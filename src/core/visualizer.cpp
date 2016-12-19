@@ -220,6 +220,7 @@ void Visualizer::pre_draw() {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glEnable(GL_DEPTH_TEST);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glViewport(0, 0, Screen::get().get_resolution_x(), Screen::get().get_resolution_y());
     Camera::get().update();
 }
 
@@ -244,6 +245,7 @@ void Visualizer::post_draw() {
     PostProcessor::get().unbind_frame_buffer();
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
+    glViewport(0, 0, Screen::get().get_width(), Screen::get().get_height());
     PostProcessor::get().draw();
 
     Display::get().close_frame();

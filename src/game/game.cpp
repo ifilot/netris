@@ -28,14 +28,15 @@ Game::Game() :
     //this->update_slots();
 
     // load synthesizer for sound effects
+    Synthesizer::get().set_gain(0, 0.5f);
     Synthesizer::get().play(0);
 
     // load fonts
     FontWriter::get().add_font("./assets/fonts/retro.ttf",
-                                16,              // font size
+                                14,              // font size
                                 0.43f, 0.25f,    // sdf settings
-                                50,              // start char
-                                73               // number of chars
+                                32,             // start char
+                                222             // number of chars
                                 );
 }
 
@@ -43,14 +44,16 @@ void Game::draw() {
     glActiveTexture(GL_TEXTURE1);
     SpriteManager::get().bind_sprites(0);
 
+    const glm::mat4 mvp = Camera::get().get_projection() * Camera::get().get_view() * glm::translate(glm::vec3(15,1,0));
+
     for(auto block = this->blocks.begin(); block != this->blocks.end(); block++) {
         if(block->get()) {
-            block->get()->draw();
+            block->get()->draw(mvp);
         }
     }
 
     if(piece != NULL) {
-        this->piece->draw();
+        this->piece->draw(mvp);
     }
 
     SpriteManager::get().unbind_sprites();
@@ -169,6 +172,8 @@ void Game::check_lines() {
 
     if(lines_to_remove.size() == 0) {
         return;
+    } else {
+        Synthesizer::get().play(2);
     }
 
     for(auto line_nr = lines_to_remove.begin(); line_nr != lines_to_remove.end(); line_nr++) {
@@ -189,5 +194,5 @@ void Game::check_lines() {
 }
 
 void Game::draw_text() {
-    FontWriter::get().write_text(0, 300.0f, 300.0f, 0.5f, glm::vec3(1,1,1), "Test");
+    FontWriter::get().write_text(0, 10.0f, 10.0f, 0.5f, glm::vec3(1,1,1), "Netris " + Settings::get().get_string_from_keyword("settings.version"));
 }

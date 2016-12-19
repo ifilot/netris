@@ -32,6 +32,7 @@
 #include "core/visualizer.h"
 #include "core/screen.h"
 #include "core/post_processor.h"
+#include "core/settings.h"
 
 /**
  * @class Display class

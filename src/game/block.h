@@ -34,7 +34,7 @@ private:
 public:
     Block(const glm::vec2& _pos, const Sprite* _sprite);
 
-    void draw();
+    void draw(const glm::mat4& mvp);
 
     void translate(float x, float y);
 

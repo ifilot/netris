@@ -29,10 +29,6 @@ PostProcessor::PostProcessor() {
     this->msaa = 4;
     this->filter_flags = 0x00000000;
 
-    // set initial resolution
-    this->resx = 640;
-    this->resy = 480;
-
     this->load_mesh();
 
     glActiveTexture(GL_TEXTURE2);
@@ -52,13 +48,13 @@ PostProcessor::PostProcessor() {
     // set blur shaders
     const float blur_radius = 2.0f;
     this->create_shader(&this->shader_blur_h, "assets/filters/blur");
-    const float width = (float)this->resx;
+    const float width = (float)Screen::get().get_resolution_x();
     this->shader_blur_h->set_uniform(1, &width);
     this->shader_blur_h->set_uniform(2, &blur_radius);
     this->shader_blur_h->set_uniform(3, &glm::vec2(1,0)[0]);
 
     this->create_shader(&this->shader_blur_v, "assets/filters/blur");
-    const float height = (float)this->resy;
+    const float height = (float)Screen::get().get_resolution_y();
     this->shader_blur_v->set_uniform(1, &height);
     this->shader_blur_v->set_uniform(2, &blur_radius);
     this->shader_blur_v->set_uniform(3, &glm::vec2(0,1)[0]);
@@ -74,7 +70,7 @@ void PostProcessor::bind_frame_buffer() {
     glBindFramebuffer(GL_FRAMEBUFFER, this->frame_buffer_msaa);
     glEnable(GL_MULTISAMPLE);
     GLenum status;
-    if ((status = glCheckFramebufferStatus(GL_FRAMEBUFFER)) != GL_FRAMEBUFFER_COMPLETE && (this->resx != 0 || this->resy != 0)) {
+    if ((status = glCheckFramebufferStatus(GL_FRAMEBUFFER)) != GL_FRAMEBUFFER_COMPLETE && (Screen::get().get_resolution_x() != 0 || Screen::get().get_resolution_y() != 0)) {
         std::cerr << "glCheckFramebufferStatus: error " << status << std::endl;
         std::cerr << __FILE__ << "(" << __LINE__ << ")" << std::endl;
     }
@@ -118,11 +114,11 @@ void PostProcessor::window_reshape() {
     this->set_buffer(this->texture_s, this->depth_s);
 
     this->shader_blur_h->link_shader();
-    const float width = this->resx != 0 ? (float)this->resx : 1.0f;
+    const float width = Screen::get().get_resolution_x() != 0 ? (float)Screen::get().get_resolution_x() : 1.0f;
     this->shader_blur_h->set_uniform(1, &width);
 
     this->shader_blur_h->link_shader();
-	const float height = this->resy != 0 ? (float)this->resy : 1.0f;
+	const float height = Screen::get().get_resolution_y() != 0 ? (float)Screen::get().get_resolution_y() : 1.0f;
     this->shader_blur_v->set_uniform(1, &height);
 }
 
@@ -153,8 +149,8 @@ void PostProcessor::resample_buffer() {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, this->frame_buffer_msaa);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, this->frame_buffer_p);
 
-    const unsigned int width = this->resx != 0 ? this->resx : 1;
-    const unsigned int height = this->resy != 0 ? this->resy : 1;
+    const unsigned int width = Screen::get().get_resolution_x() != 0 ? Screen::get().get_resolution_x() : 1;
+    const unsigned int height = Screen::get().get_resolution_y() != 0 ? Screen::get().get_resolution_y() : 1;
 
     glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, GL_NEAREST);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -239,9 +235,20 @@ void PostProcessor::render(const std::unique_ptr<Shader>& shader) {
     shader->link_shader();
     shader->set_uniform(0, NULL); // set texture id
 
-    const float sx = (float)this->resx / (float)Screen::get().get_width();
-    const float sy = (float)this->resy / (float)Screen::get().get_height();
+    const float screen_ratios = Screen::get().get_aspect_ratio_screen() / Screen::get().get_aspect_ratio_resolution();
+
+    float sx, sy;
+    if(Screen::get().get_width() > Screen::get().get_height()) {
+        // fit screen to height
+        sy = 1.0f;
+        sx = 1.0f / screen_ratios;
+    } else {
+        sx = 1.0f;
+        sy = screen_ratios;
+    }
+
     const glm::mat4 mvp = glm::scale(glm::vec3(sx, sy, 1.0f));
+
     shader->set_uniform(1, &mvp[0][0]);
 
     glBindVertexArray(this->vao);
@@ -256,8 +263,8 @@ void PostProcessor::render(const std::unique_ptr<Shader>& shader) {
  * @brief      create the multisampling fbo
  */
 void PostProcessor::create_msaa_buffer(GLuint* render_buffer, GLuint* texture, GLuint* frame_buffer) {
-    const unsigned int width = this->resx;
-    const unsigned int height = this->resy;
+    const unsigned int width = Screen::get().get_resolution_x();
+    const unsigned int height = Screen::get().get_resolution_y();
 
 	glGenRenderbuffers(1, render_buffer);
     glBindRenderbuffer(GL_RENDERBUFFER, *render_buffer);
@@ -285,8 +292,8 @@ void PostProcessor::create_msaa_buffer(GLuint* render_buffer, GLuint* texture, G
  * @brief      create the renderbuffer objects
  */
 void PostProcessor::create_buffer(GLuint* render_buffer, GLuint* texture, GLuint* frame_buffer) {
-    const unsigned int width = this->resx;
-    const unsigned int height = this->resy;
+    const unsigned int width = Screen::get().get_resolution_x();
+    const unsigned int height = Screen::get().get_resolution_y();
 
     glGenRenderbuffers(1, render_buffer);
     glBindRenderbuffer(GL_RENDERBUFFER, *render_buffer);
@@ -296,8 +303,11 @@ void PostProcessor::create_buffer(GLuint* render_buffer, GLuint* texture, GLuint
     glActiveTexture(GL_TEXTURE2);
     glGenTextures(1, texture);
     glBindTexture(GL_TEXTURE_2D, *texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    // set minmag filters (GL_NEAREST is faster, GL_LINEAR is higher quality)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -307,6 +317,7 @@ void PostProcessor::create_buffer(GLuint* render_buffer, GLuint* texture, GLuint
     glBindFramebuffer(GL_FRAMEBUFFER, *frame_buffer);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, *texture, 0);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, *render_buffer);
+
     GLenum status;
     if ((status = glCheckFramebufferStatus(GL_FRAMEBUFFER)) != GL_FRAMEBUFFER_COMPLETE) {
         std::cerr << "glCheckFramebufferStatus: error " << status << std::endl;
@@ -321,11 +332,11 @@ void PostProcessor::set_msaa_buffer(GLuint texture, GLuint frame_buffer) {
     // resize regular buffer
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, texture);
-    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, this->msaa, GL_RGBA, this->resx, this->resy, GL_TRUE);
+    glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, this->msaa, GL_RGBA, Screen::get().get_resolution_x(), Screen::get().get_resolution_y(), GL_TRUE);
     glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 
     glBindRenderbuffer(GL_RENDERBUFFER, frame_buffer);
-    glRenderbufferStorageMultisample(GL_RENDERBUFFER, this->msaa, GL_DEPTH24_STENCIL8, this->resx, this->resy);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, this->msaa, GL_DEPTH24_STENCIL8, Screen::get().get_resolution_x(), Screen::get().get_resolution_y());
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
 
@@ -333,8 +344,8 @@ void PostProcessor::set_msaa_buffer(GLuint texture, GLuint frame_buffer) {
  * @brief      set with and height to regular buffers
  */
 void PostProcessor::set_buffer(GLuint texture, GLuint frame_buffer) {
-    const unsigned int width = this->resx;
-    const unsigned int height = this->resy;
+    const unsigned int width = Screen::get().get_resolution_x();
+    const unsigned int height = Screen::get().get_resolution_y();
 
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -342,7 +353,7 @@ void PostProcessor::set_buffer(GLuint texture, GLuint frame_buffer) {
     glBindTexture(GL_TEXTURE_2D, 0);
 
     glBindRenderbuffer(GL_RENDERBUFFER, frame_buffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, this->resx, this->resy);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, Screen::get().get_resolution_x(), Screen::get().get_resolution_y());
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
 }
 

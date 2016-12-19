@@ -23,4 +23,7 @@
 Screen::Screen() {
     this->width = 800;
     this->height = 600;
+
+    this->resolution_x = 640;
+    this->resolution_y = 480;
 }
