@@ -69,6 +69,9 @@ private:
     GLuint vao;
     GLuint vbo[2];
 
+    unsigned int resx;
+    unsigned int resy;
+
 public:
     /**
      * @fn          get
@@ -101,6 +104,10 @@ public:
      */
     inline void disable_filter(unsigned int bit) {
         this->filter_flags &= ~bit;
+    }
+
+    inline float get_aspect_ratio() const {
+        return (float)this->resx / (float)this->resy;
     }
 
     /**

@@ -66,6 +66,10 @@ public:
         this->height = _height;
     }
 
+    inline float get_aspect_ratio() const {
+        return (float)this->width / (float)this->height;
+    }
+
     inline bool in_focus() const {
         return this->flag_focus;
     }

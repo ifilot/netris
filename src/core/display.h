@@ -31,6 +31,7 @@
 #include "core/camera.h"
 #include "core/visualizer.h"
 #include "core/screen.h"
+#include "core/post_processor.h"
 
 /**
  * @class Display class

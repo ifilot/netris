@@ -105,8 +105,7 @@ Display::Display() {
     //glfwSetInputMode(this->m_window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
     // configure camera dimensions
-	const float aspect_ratio = height != 0 ? (float)width / (float)height : 1.0f;
-    Camera::get().set_aspect_ratio(aspect_ratio);
+    Camera::get().set_aspect_ratio(PostProcessor::get().get_aspect_ratio());
     Camera::get().update();
 }
 
@@ -276,8 +275,7 @@ void Display::framebuffer_size_callback(GLFWwindow* window, int width, int heigh
     Screen::get().set_height(height);
 
     // update camera settings
-	const float aspect_ratio = height != 0 ? (float)width / (float)height : 1.0f;
-    Camera::get().set_aspect_ratio(aspect_ratio);
+    Camera::get().set_aspect_ratio(PostProcessor::get().get_aspect_ratio());
     Camera::get().update();
 
     // update post processor
