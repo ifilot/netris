@@ -29,6 +29,7 @@
 #include "game/block.h"
 #include "game/piece.h"
 #include "core/synthesizer.h"
+#include "core/font_writer.h"
 
 class Game {
 private:
@@ -36,7 +37,9 @@ private:
     Piece* piece;
     std::bitset<240> slots;
     std::vector<std::vector<Block>::iterator> block_indices;
-    boost::random::mt19937 rng;
+
+    boost::random::mt19937 rng_engine;
+    boost::random::uniform_int_distribution<> rng_distribution;
 
 public:
     static Game& get() {
@@ -62,6 +65,8 @@ private:
     void rotate_piece(float angle);
 
     void check_lines();
+
+    void draw_text();
 
     // Singleton pattern
     Game(Game const&)          = delete;

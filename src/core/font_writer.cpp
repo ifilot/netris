@@ -35,46 +35,6 @@ FontWriter::FontWriter() {
     this->shader->add_uniform(ShaderUniform::FLOAT, "width", 1);
     this->shader->add_uniform(ShaderUniform::FLOAT, "edge", 1);
     this->shader->set_texture_id(1); // corresponds to GL_TEXTURE1
-
-    this->add_font("./assets/fonts/sourcecodepro-regular.ttf",
-                    8,              // font size
-                    0.43f, 0.25f,     // sdf settings
-                    32,             // start char
-                    222             // number of chars
-                    );
-
-    this->add_font("./assets/fonts/candera.ttf",
-                    8,      // font size
-                    0.43f, 0.25f,     // sdf settings
-                    32,     // start char
-                    222      // number of chars
-                    );
-
-    this->add_font("./assets/fonts/fontawesome-webfont.ttf",
-                    8,
-                    0.43f, 0.15f,     // sdf settings
-                    std::stoul("0xF000", NULL, 16),
-                    std::stoul("0xF2B3", NULL, 16) - std::stoul("0xF000", NULL, 16));
-
-    this->add_font("./assets/fonts/tahoma.ttf",
-                    6,      // font size
-                    0.43f, 0.25f,     // sdf settings
-                    32,     // start char
-                    222      // number of chars
-                    );
-
-    this->add_font("./assets/fonts/sourcecodepro-regular.ttf",
-                    6,      // font size
-                    0.40f, 0.30f,     // sdf settings
-                    32,     // start char
-                    222      // number of chars
-                    );
-
-    this->add_font("./assets/fonts/fontawesome-webfont.ttf",
-                    6,
-                    0.35f, 0.30f,     // sdf settings
-                    std::stoul("0xF000", NULL, 16),
-                    std::stoul("0xF2B3", NULL, 16) - std::stoul("0xF000", NULL, 16));
 }
 
 /**
@@ -167,7 +127,7 @@ FontWriter::CharacterAtlas::CharacterAtlas(const std::string& font_file, unsigne
     FT_Done_FreeType(library);
 }
 
-/*
+/*link_shaderlink_shader
  * @brief       write a line of characters
  *
  * @param[in]   x           x position of the line
@@ -346,7 +306,7 @@ void FontWriter::CharacterAtlas::static_load() {
      * TEXTURE COORDINATES
      */
 
-     // up the vertex_id
+    // up the vertex_id
     // bind a buffer identified by POSITION_VB and interpret this buffer as an array
     glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
     // fill the buffer with data
@@ -499,7 +459,8 @@ void FontWriter::CharacterAtlas::generate_character_map(const std::string& filen
         int col;
         int bit_depth;
 
-        PNG::load_image_buffer_from_png(filename + ".png", this->expanded_data, &this->texture_width, &this->texture_height, &col, &bit_depth);
+        // note: the FontWriter class assumes that the bitmap is stored in memory with the origin at NW
+        PNG::load_image_buffer_from_png(filename + ".png", this->expanded_data, &this->texture_width, &this->texture_height, &col, &bit_depth, false);
 
         if(col != 0) { // note: 0 means GREYSCALE image
             std::cerr << "Invalid number of colors read in font reader: " << col << std::endl;
@@ -582,7 +543,7 @@ void FontWriter::CharacterAtlas::generate_character_map(const std::string& filen
         }
 
         // save result to assets
-        PNG::write_image_buffer_to_png(filename + ".png", this->expanded_data, this->texture_width, this->texture_height, PNG_COLOR_TYPE_GRAY);
+        PNG::write_image_buffer_to_png(filename + ".png", this->expanded_data, this->texture_width, this->texture_height, PNG_COLOR_TYPE_GRAY, true);
     }
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

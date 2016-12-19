@@ -20,7 +20,8 @@
 
 #include "game.h"
 
-Game::Game() {
+Game::Game() :
+    rng_distribution(0,6) {
     this->piece = new Piece(0);
     this->blocks.resize(240);
 
@@ -28,6 +29,14 @@ Game::Game() {
 
     // load synthesizer for sound effects
     Synthesizer::get().play(0);
+
+    // load fonts
+    FontWriter::get().add_font("./assets/fonts/retro.ttf",
+                                16,              // font size
+                                0.43f, 0.25f,    // sdf settings
+                                50,              // start char
+                                73               // number of chars
+                                );
 }
 
 void Game::draw() {
@@ -45,6 +54,9 @@ void Game::draw() {
     }
 
     SpriteManager::get().unbind_sprites();
+
+    // draw font
+    this->draw_text();
 }
 
 void Game::update() {
@@ -88,8 +100,7 @@ void Game::launch_new_piece() {
     this->check_lines();
 
     // make new piece
-    boost::random::uniform_int_distribution<> dist(0,6);
-    int type = dist(this->rng);
+    int type = this->rng_distribution(this->rng_engine);
     this->piece = new Piece(type);
 }
 
@@ -175,4 +186,8 @@ void Game::check_lines() {
     }
 
     this->update_slots();
+}
+
+void Game::draw_text() {
+    FontWriter::get().write_text(0, 300.0f, 300.0f, 0.5f, glm::vec3(1,1,1), "Test");
 }

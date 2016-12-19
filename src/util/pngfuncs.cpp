@@ -20,7 +20,7 @@
 
 #include "pngfuncs.h"
 
-void PNG::write_image_buffer_to_png(const std::string& filename, const std::vector<uint8_t>& buffer, unsigned int width, unsigned int height, unsigned int col) {
+void PNG::write_image_buffer_to_png(const std::string& filename, const std::vector<uint8_t>& buffer, unsigned int width, unsigned int height, unsigned int col, bool invert) {
     png_structp png_ptr;
     png_infop info_ptr;
 
@@ -83,8 +83,11 @@ void PNG::write_image_buffer_to_png(const std::string& filename, const std::vect
             row_pointers[i] = new unsigned char[width * coldepth];
             for(unsigned int j=0; j<width; j++) {
                 for(unsigned int p=0; p<coldepth; p++) {
-                    // note that height needs to inverted for correct image capture
-                    row_pointers[i][j * coldepth + p] = buffer[((height - i - 1) * width + j) * coldepth + p];
+                    if(invert) {
+                        row_pointers[i][j * coldepth + p] = buffer[((height - i - 1) * width + j) * coldepth + p];
+                    } else {
+                        row_pointers[i][j * coldepth + p] = buffer[i * width * coldepth + j * coldepth + p];
+                    }
                 }
             }
         }
@@ -108,7 +111,7 @@ void PNG::write_image_buffer_to_png(const std::string& filename, const std::vect
     ofile.close();
 }
 
-void PNG::load_image_buffer_from_png(const std::string& filename, std::vector<uint8_t>& buffer, png_uint_32* width, png_uint_32* height, int* col, int* bit_depth) {
+void PNG::load_image_buffer_from_png(const std::string& filename, std::vector<uint8_t>& buffer, png_uint_32* width, png_uint_32* height, int* col, int* bit_depth, bool invert) {
     png_structp png_ptr;
     png_infop info_ptr;
 
@@ -168,17 +171,27 @@ void PNG::load_image_buffer_from_png(const std::string& filename, std::vector<ui
         case PNG_COLOR_TYPE_RGB:
             channels = 3;
         break;
+        case PNG_COLOR_TYPE_GRAY:
+            channels = 1;
+        break;
         default:
             channels = 1;
         break;
     }
 
     // transfer data to std::vector
-    buffer.resize((*width) * (*height) * channels, 0);
-    for(unsigned int i=0; i<(*height); i++) {
-        for(unsigned int j=0; j<(*width); j++) {
+    const unsigned int w = *width;
+    const unsigned int h = *height;
+
+    buffer.resize(w * h * channels, 0);
+    for(unsigned int i=0; i<h; i++) {
+        for(unsigned int j=0; j<w; j++) {
             for(unsigned int p=0; p<channels; p++) {
-                buffer[(((*height) - i - 1) * (*width) + j) * channels + p] = row_pointers[i][j * channels + p];
+                if(invert) {
+                    buffer[((h - i - 1) * w + j) * channels + p] = row_pointers[i][j * channels + p];
+                } else {
+                    buffer[i * w * channels + j * channels + p] = row_pointers[i][j * channels + p];
+                }
             }
         }
     }

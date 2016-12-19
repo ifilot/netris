@@ -85,7 +85,8 @@ void SpriteManager::load_texture(const std::string& filename, unsigned int id) {
                                     &width,
                                     &height,
                                     &col,
-                                    &bit_depth);
+                                    &bit_depth,
+                                    true);  // automatically invert the image
 
     switch(col) {
         case PNG_COLOR_TYPE_RGB:

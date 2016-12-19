@@ -230,6 +230,7 @@ public:
      */
     unsigned int add_font(const std::string& fontfile, unsigned int pt, float _width, float _edge, unsigned int cstart, unsigned int ccount);
 
+
     /**
      * @brief       render a string of wchar_t characters on the screen
      *
