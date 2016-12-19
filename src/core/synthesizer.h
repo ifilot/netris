@@ -30,6 +30,8 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <vorbis/codec.h>
+#include <vorbis/vorbisfile.h>
 
 class Synthesizer {
 private:
@@ -54,13 +56,15 @@ public:
 private:
     Synthesizer();
 
-    void load_sound_data(const std::string& filename);
+    void load_wav_file(const std::string& filename);
 
     void set_listener();
 
     void delete_buffers_and_sources();
 
-    void load_mp3(const std::string filename);
+    void load_ogg_file(const std::string filename);
+
+    void bind_source_to_last_buffer();
 
     // Singleton pattern
     Synthesizer(Synthesizer const&) = delete;

@@ -24,8 +24,8 @@ Synthesizer::Synthesizer() {
     alutInit(NULL, 0);
     alGetError();
 
-    this->load_sound_data("music/theme.wav");
-    this->load_sound_data("effects/block_hit.wav");
+    this->load_ogg_file("music/theme.ogg");
+    this->load_ogg_file("effects/block_hit.ogg");
 
     this->set_listener();
 
@@ -33,7 +33,7 @@ Synthesizer::Synthesizer() {
     atexit(Synthesizer::kill_synthesizer);
 }
 
-void Synthesizer::load_sound_data(const std::string& filename) {
+void Synthesizer::load_wav_file(const std::string& filename) {
     // Load wav data into a buffer.
 
     this->buffers.push_back(0);
@@ -41,35 +41,9 @@ void Synthesizer::load_sound_data(const std::string& filename) {
     if(alGetError() != AL_NO_ERROR) {
         std::cerr << "An error was detecting loading the sound file" << std::endl;
         return;
+    } else {
+        this->bind_source_to_last_buffer();
     }
-
-    // Bind the buffer with the source.
-
-    this->sources.push_back(0);
-    alGenSources(1, &this->sources.back());
-
-    if(alGetError() != AL_NO_ERROR) {
-        std::cerr << "An error was detecting loading the sound source" << std::endl;
-        return;
-    }
-
-    ALfloat source_position[] = { 0.0, 0.0, 0.0 };
-    ALfloat source_velocity[] = { 0.0, 0.0, 0.0 };
-
-    alSourcei (this->sources.back(), AL_BUFFER,   this->buffers.back()   );
-    alSourcef (this->sources.back(), AL_PITCH,    1.0      );
-    alSourcef (this->sources.back(), AL_GAIN,     1.0      );
-    alSourcefv(this->sources.back(), AL_POSITION, source_position);
-    alSourcefv(this->sources.back(), AL_VELOCITY, source_velocity);
-    alSourcei (this->sources.back(), AL_LOOPING,  false     );
-
-    // Do another error check and return.
-
-    if(alGetError() == AL_NO_ERROR) {
-        return;
-    }
-
-    return;
 }
 
 void Synthesizer::set_listener() {
@@ -101,6 +75,66 @@ void Synthesizer::delete_buffers_and_sources() {
     this->sources.clear();
 }
 
+void Synthesizer::load_ogg_file(const std::string filename) {
+    OggVorbis_File vf;
+
+    if(ov_fopen((AssetManager::get().get_root_directory() + "assets/ogg/" + filename).c_str(), &vf) < 0) {
+        std::cerr << "Error opening Vorbis file" << std::endl;
+    }
+
+    vorbis_info *vi = ov_info(&vf,-1);
+    //std::cout << "Bitstream is " << vi->channels << " channel(s), " << vi->rate << " Hz " << std::endl;
+
+    int eof = 0;
+    int current_section = 0;
+    char pcmout[4096];
+    std::vector<char> sound_data;
+
+    while(!eof){
+        long ret = ov_read(&vf, pcmout, sizeof(pcmout), 0, 2, 1, &current_section);
+        if (ret == 0) {
+            eof=1; // set end of file
+        } else if (ret < 0) {
+              std::cerr << "Some error was encountered" << std::endl;
+        } else {
+            for(long i=0; i<ret; i++) {
+                sound_data.push_back(pcmout[i]);
+            }
+        }
+    }
+
+    this->buffers.push_back(0);
+    alGenBuffers(1, &this->buffers.back());
+    if(alGetError() != AL_NO_ERROR) {
+        std::cerr << "An error was detecting loading the sound file" << std::endl;
+        return;
+    }
+
+    ALenum format;
+    switch(vi->channels) {
+        case 1:
+            format = AL_FORMAT_MONO16;
+        break;
+        case 2:
+            format = AL_FORMAT_STEREO16;
+        break;
+        default:
+            // do nothing
+        break;
+    }
+
+    alBufferData(this->buffers.back(), format, &sound_data[0], sound_data.size(), (int32_t)vi->rate);
+
+    ov_clear(&vf); // we no longer need the data
+
+    if(alGetError() != AL_NO_ERROR) {
+        std::cerr << "An error was detecting loading the sound file" << std::endl;
+        return;
+    } else {
+        this->bind_source_to_last_buffer();
+    }
+}
+
 void Synthesizer::kill_synthesizer() {
     Synthesizer::get().delete_buffers_and_sources();
     alutExit();
@@ -109,4 +143,31 @@ void Synthesizer::kill_synthesizer() {
 Synthesizer::~Synthesizer() {
     this->delete_buffers_and_sources();
     alutExit();
+}
+
+void Synthesizer::bind_source_to_last_buffer() {
+    this->sources.push_back(0);
+    alGenSources(1, &this->sources.back());
+
+    if(alGetError() != AL_NO_ERROR) {
+        std::cerr << "An error was detecting loading the sound source" << std::endl;
+        return;
+    }
+
+    ALfloat source_position[] = { 0.0, 0.0, 0.0 };
+    ALfloat source_velocity[] = { 0.0, 0.0, 0.0 };
+
+    alSourcei (this->sources.back(), AL_BUFFER, this->buffers.back());
+    alSourcef (this->sources.back(), AL_PITCH, 1.0);
+    alSourcef (this->sources.back(), AL_GAIN, 1.0);
+    alSourcefv(this->sources.back(), AL_POSITION, source_position);
+    alSourcefv(this->sources.back(), AL_VELOCITY, source_velocity);
+    alSourcei (this->sources.back(), AL_LOOPING, false);
+
+    // Do another error check and return.
+    if(alGetError() == AL_NO_ERROR) {
+        return;
+    } else {
+        std::cerr << "An error was encountered creating the sound source" << std::endl;
+    }
 }
