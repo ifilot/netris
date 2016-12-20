@@ -24,6 +24,7 @@ Game::Game() :
     rng_distribution(0,6) {
     this->piece = new Piece(0);
     this->blocks.resize(240);
+    this->score = 0;
 
     //this->update_slots();
 
@@ -44,7 +45,9 @@ void Game::draw() {
     glActiveTexture(GL_TEXTURE1);
     SpriteManager::get().bind_sprites(0);
 
-    const glm::mat4 mvp = Camera::get().get_projection() * Camera::get().get_view() * glm::translate(glm::vec3(15,1,0));
+    const unsigned int bw = Screen::get().get_aspect_ratio_resolution() * 22;
+    const unsigned int lb = (bw - 10) / 2 + 1;
+    const glm::mat4 mvp = Camera::get().get_projection() * Camera::get().get_view() * glm::translate(glm::vec3((float)lb,1,0));
 
     for(auto block = this->blocks.begin(); block != this->blocks.end(); block++) {
         if(block->get()) {
@@ -120,6 +123,7 @@ void Game::handle_key_down(int key, int scancode, int action, int mods) {
 
     if(key == 'S' && (action == GLFW_REPEAT || action == GLFW_PRESS) && mods == 0) {
         this->translate_piece(glm::vec2(0,-1));
+        this->score += 1;
         return;
     }
 
@@ -174,6 +178,20 @@ void Game::check_lines() {
         return;
     } else {
         Synthesizer::get().play(2);
+        switch(lines_to_remove.size()) {
+            case 1:
+                this->score += 100;
+            break;
+            case 2:
+                this->score += 200;
+            break;
+            case 3:
+                this->score += 400;
+            break;
+            case 4:
+                this->score += 1000;
+            break;
+        }
     }
 
     for(auto line_nr = lines_to_remove.begin(); line_nr != lines_to_remove.end(); line_nr++) {
@@ -194,5 +212,7 @@ void Game::check_lines() {
 }
 
 void Game::draw_text() {
-    FontWriter::get().write_text(0, 10.0f, 10.0f, 0.5f, glm::vec3(1,1,1), "Netris " + Settings::get().get_string_from_keyword("settings.version"));
+    FontWriter::get().write_text(0, 10.0f, 40.0f, 0.5f, glm::vec3(1,1,1), "Netris " + Settings::get().get_string_from_keyword("settings.version"));
+    FontWriter::get().write_text(0, 10.0f, 860.0f, 0.5f, glm::vec3(1,1,1), "Score:");
+    FontWriter::get().write_text(0, 10.0f, 820.0f, 0.5f, glm::vec3(1,1,1), boost::lexical_cast<std::string>(this->score));
 }

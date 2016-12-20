@@ -42,6 +42,8 @@ private:
     boost::random::mt19937 rng_engine;
     boost::random::uniform_int_distribution<> rng_distribution;
 
+    unsigned int score;
+
 public:
     static Game& get() {
         static Game game_instance;
