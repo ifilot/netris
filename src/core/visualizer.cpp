@@ -95,9 +95,6 @@ void Visualizer::run(int argc, char* argv[]) {
 
         // perform post-drawing operations (post processing)
         this->post_draw();
-
-        // stop drawing here
-        Display::get().close_frame();  /* close the frame */
     }
 }
 
@@ -116,8 +113,6 @@ void Visualizer::run(int argc, char* argv[]) {
  */
 void Visualizer::handle_key_down(int key, int scancode, int action, int mods) {
     if(key == 'Q'  && mods & GLFW_MOD_CONTROL
-                   && mods & GLFW_MOD_SHIFT
-                   && mods & GLFW_MOD_ALT
                    && action == GLFW_RELEASE) {
         glfwSetWindowShouldClose(Display::get().get_window_ptr(), GL_TRUE);
     } else {
@@ -209,8 +204,9 @@ void Visualizer::update_second() {
  *
  */
 void Visualizer::pre_draw() {
-    //Screen::get().set_focus(glfwGetWindowAttrib(Display::get().get_window_ptr(), GLFW_FOCUSED));
     Display::get().open_frame();   /* start new frame */
+
+    Screen::get().set_focus(glfwGetWindowAttrib(Display::get().get_window_ptr(), GLFW_FOCUSED));
 
     // first create a texture map
     Light::get().update();

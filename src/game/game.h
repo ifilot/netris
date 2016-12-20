@@ -21,6 +21,7 @@
 #ifndef _GAME_H
 #define _GAME_H
 
+#include <list>
 #include <bitset>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
@@ -37,10 +38,10 @@ private:
     std::vector<std::unique_ptr<Block>> blocks;
     Piece* piece;
     std::bitset<240> slots;
+    std::vector<unsigned int> piece_bag;
     std::vector<std::vector<Block>::iterator> block_indices;
 
     boost::random::mt19937 rng_engine;
-    boost::random::uniform_int_distribution<> rng_distribution;
 
     unsigned int score;
 
@@ -70,6 +71,8 @@ private:
     void check_lines();
 
     void draw_text();
+
+    void grab_pieces();
 
     // Singleton pattern
     Game(Game const&)          = delete;

@@ -5,8 +5,8 @@
       "screen":
       {
          "resolution_x": 1440,
-         "resolution_y": 900,
-         "full_screen": true
+         "resolution_y": 800,
+         "full_screen": false
       }
    }
 }

@@ -20,16 +20,16 @@
 
 #include "game.h"
 
-Game::Game() :
-    rng_distribution(0,6) {
+Game::Game() {
     this->piece = new Piece(0);
     this->blocks.resize(240);
     this->score = 0;
 
     //this->update_slots();
+    this->grab_pieces();
 
     // load synthesizer for sound effects
-    Synthesizer::get().set_gain(0, 0.5f);
+    Synthesizer::get().set_gain(0, 0.2f);
     Synthesizer::get().play(0);
 
     // load fonts
@@ -106,8 +106,13 @@ void Game::launch_new_piece() {
     this->check_lines();
 
     // make new piece
-    int type = this->rng_distribution(this->rng_engine);
-    this->piece = new Piece(type);
+    // boost::random::uniform_int_distribution<> rng_distribution(0,6);
+    // int type = rng_distribution(this->rng_engine);
+    if(this->piece_bag.size() == 0) {
+        this->grab_pieces();
+    }
+    this->piece = new Piece(this->piece_bag.back());
+    this->piece_bag.pop_back();
 }
 
 void Game::handle_key_down(int key, int scancode, int action, int mods) {
@@ -212,7 +217,23 @@ void Game::check_lines() {
 }
 
 void Game::draw_text() {
-    FontWriter::get().write_text(0, 10.0f, 40.0f, 0.5f, glm::vec3(1,1,1), "Netris " + Settings::get().get_string_from_keyword("settings.version"));
-    FontWriter::get().write_text(0, 10.0f, 860.0f, 0.5f, glm::vec3(1,1,1), "Score:");
-    FontWriter::get().write_text(0, 10.0f, 820.0f, 0.5f, glm::vec3(1,1,1), boost::lexical_cast<std::string>(this->score));
+    FontWriter::get().write_text(0, 20.0f, 10.0f, 0.5f, glm::vec3(1,1,1), "Netris " + Settings::get().get_string_from_keyword("settings.version"));
+    FontWriter::get().write_text(0, 20.0f, 760.0f, 0.5f, glm::vec3(1,1,1), "Score:");
+    FontWriter::get().write_text(0, 20.0f, 720.0f, 0.5f, glm::vec3(1,1,1), boost::lexical_cast<std::string>(this->score));
+}
+
+void Game::grab_pieces() {
+    std::list<unsigned int> pieces;
+    for(unsigned int i=0; i<7; i++) {
+        pieces.push_back(i);
+    }
+
+    for(unsigned int i=7; i>0; i--) {
+        boost::random::uniform_int_distribution<> rng_distribution(0,i-1);
+        unsigned int j = rng_distribution(this->rng_engine);
+        auto item = pieces.begin();
+        std::advance(item, j);
+        this->piece_bag.push_back(*item);
+        pieces.erase(item);
+    }
 }
